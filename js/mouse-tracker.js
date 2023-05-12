@@ -5,11 +5,16 @@ class MouseTracker {
     boundBottom = 100;
     boundRight = 100;
 
+    position = {
+        x: 0,
+        y: 0,
+    }
+
     body = null;
     tracker = null;
 
     constructor(applicationSelector, trackerSelector) {
-        if(this.initBody(applicationSelector)){
+        if (this.initBody(applicationSelector)) {
             this.initTracker(trackerSelector);
             this.registerEvents();
             /* expose to window */
@@ -41,38 +46,64 @@ class MouseTracker {
         this.boundBottom = object.bottom;
         this.boundLeft = object.left;
         this.boundRight = object.right;
+
+        this.updatePosition();
     }
 
-    updatePosition(object){
-        let top = object.top;
-        let left = object.left;
+    getPosition(){
+        return this.position;
+    }
 
+    updatePosition() {
+        let y = this.checkVerticalBounds(this.position.y);
+        let x = this.checkHorizontalBounds(this.position.x);
+
+        this.body.style.setProperty('--mouse-tracker-top', (y - (this.tracker.clientHeight / 2)) + "px");
+        this.body.style.setProperty('--mouse-tracker-left', (x - (this.tracker.clientWidth / 2)) + "px");
+    }
+
+    checkVerticalBounds(number) {
         let bodyRect = this.body.getBoundingClientRect();
+        let y = number;
 
-        if (top < bodyRect.top + this.boundTop) {
-            top = bodyRect.top + this.boundTop;
+        if (y < bodyRect.top + this.boundTop) {
+            y = bodyRect.top + this.boundTop;
         }
-        if (left < bodyRect.left + this.boundLeft) {
-            left = bodyRect.left + this.boundLeft;
+        if (y > bodyRect.bottom - this.boundBottom) {
+            y = bodyRect.bottom - this.boundBottom;
         }
-        if (top > bodyRect.bottom - this.boundBottom) {
-            top = bodyRect.bottom - this.boundBottom;
-        }
-        if (left > bodyRect.right - this.boundRight) {
-            left = bodyRect.right - this.boundRight;
+        return y
+    }
+
+    checkHorizontalBounds(number) {
+        let bodyRect = this.body.getBoundingClientRect();
+        let x = number;
+
+        if (x < bodyRect.left + this.boundLeft) {
+            x = bodyRect.left + this.boundLeft;
         }
 
-        this.body.style.setProperty('--mouse-tracker-top', (top - (this.tracker.clientHeight / 2)) + "px");
-        this.body.style.setProperty('--mouse-tracker-left', (left - (this.tracker.clientWidth / 2)) + "px");
+        if (x > bodyRect.right - this.boundRight) {
+            x = bodyRect.right - this.boundRight;
+        }
+
+        return x;
     }
 
     registerEvents() {
         addEventListener("DOMContentLoaded", () => {
 
             addEventListener("mousemove", (event) => {
-                this.updatePosition({top: event.clientY, left: event.clientX});
+                this.setPosition({y: event.clientY, x: event.clientX});
             });
         });
+    }
+
+    setPosition(object){
+        this.position.x = this.checkHorizontalBounds(object.x);
+        this.position.y = this.checkVerticalBounds(object.y);
+
+        this.updatePosition();
     }
 
     initTracker(trackerSelector) {
@@ -82,7 +113,8 @@ class MouseTracker {
             console.log('bound tracker:', this.tracker);
         }
     }
-    initBody(applicationSelector){
+
+    initBody(applicationSelector) {
         console.log('trying to bind to ' + applicationSelector);
         this.body = document.querySelector(applicationSelector);
         if (this.body != null) {
