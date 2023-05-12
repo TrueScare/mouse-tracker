@@ -24,10 +24,16 @@ body {
     z-index: 500;
 }
 
+.group-container{
+    display: flex;
+    flex-wrap: wrap;
+}
+
 .group {
     display: flex;
     flex-wrap: wrap;
     margin-bottom: 20px;
+    width: 50%;
 }
 
 .group label {

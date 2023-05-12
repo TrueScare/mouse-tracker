@@ -1,5 +1,7 @@
 class MouseTracker {
 
+    logActive = false;
+
     boundTop = 100;
     boundLeft = 100;
     boundBottom = 100;
@@ -13,14 +15,15 @@ class MouseTracker {
     body = null;
     tracker = null;
 
-    constructor(applicationSelector, trackerSelector) {
+    constructor(applicationSelector = '', trackerSelector = '', logActive = false) {
+        this.logActive = logActive;
         if (this.initBody(applicationSelector)) {
             this.initTracker(trackerSelector);
             this.registerEvents();
             /* expose to window */
             window.mousetracker = this;
         } else {
-            console.log('Something went wrong during initialization!');
+            this.logDebug('Something went wrong during initialization!');
         }
     }
 
@@ -50,7 +53,7 @@ class MouseTracker {
         this.updatePosition();
     }
 
-    getPosition(){
+    getPosition() {
         return this.position;
     }
 
@@ -99,7 +102,7 @@ class MouseTracker {
         });
     }
 
-    setPosition(object){
+    setPosition(object) {
         this.position.x = this.checkHorizontalBounds(object.x);
         this.position.y = this.checkVerticalBounds(object.y);
 
@@ -107,27 +110,33 @@ class MouseTracker {
     }
 
     initTracker(trackerSelector) {
-        console.log('trying to bind tracker...');
+        this.logDebug('trying to bind tracker...');
         this.tracker = this.body.querySelector(trackerSelector);
         if (this.tracker != null) {
-            console.log('bound tracker:', this.tracker);
+            this.logDebug('bound tracker:', this.tracker);
         }
     }
 
     initBody(applicationSelector) {
-        console.log('trying to bind to ' + applicationSelector);
+        this.logDebug('trying to bind to ' + applicationSelector);
         this.body = document.querySelector(applicationSelector);
         if (this.body != null) {
-            console.log('bound to:', this.body);
+            this.logDebug('bound to:', this.body)
             this.registerEvents();
         } else {
-            console.log('bind unsuccessful');
+            this.logDebug('bind unsuccessful');
         }
 
         this.body.style.setProperty('--mouse-tracker-top', this.boundTop + 'px');
         this.body.style.setProperty('--mouse-tracker-left', this.boundLeft + 'px');
 
         return this.body != null;
+    }
+
+    logDebug(...args) {
+        if (this.logActive === true) {
+            console.log(...args);
+        }
     }
 }
 
