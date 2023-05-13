@@ -4,10 +4,13 @@ let tracker1 = new MouseTracker('#tracker-body-1', '#mouse-tracker-1');
 let tracker2 = new MouseTracker('#tracker-body-2', '#mouse-tracker-2');
 let tracker3 = new MouseTracker('#tracker-body-3', '#mouse-tracker-3');
 
+let trackers = [tracker1, tracker2, tracker3];
+
 let boundTop = document.getElementById('bound-top');
 let boundBottom = document.getElementById('bound-bottom');
 let boundLeft = document.getElementById('bound-left');
 let boundRight = document.getElementById('bound-right');
+let logging = document.getElementById('loggingactive');
 
 boundTop.onchange = (event) => {
     let bounds = tracker1.getBounds();
@@ -29,3 +32,8 @@ boundRight.onchange = (event) => {
     bounds.right = parseInt(boundRight.value);
     tracker1.setBounds(bounds);
 };
+logging.onchange = (event) => {
+    trackers.forEach((tracker) => {
+        tracker.setLogActive(logging.checked);
+    })
+}

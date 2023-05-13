@@ -49,11 +49,14 @@ class MouseTracker {
     }
 
     setBounds(object) {
+        this.logDebug('set bounds from:', object);
         this.boundTop = object.top;
         this.boundBottom = object.bottom;
         this.boundLeft = object.left;
         this.boundRight = object.right;
+        this.logDebug('setting boundaries complete');
 
+        this.logDebug('updating position and visibility');
         this.updatePosition();
         this.updateVisibility();
     }
@@ -63,11 +66,15 @@ class MouseTracker {
     }
 
     updatePosition() {
+        this.logDebug('updating visibility from tracker position:', this.trackerPosition);
         let y = this.checkVerticalBounds(this.trackerPosition.y);
         let x = this.checkHorizontalBounds(this.trackerPosition.x);
 
+        this.logDebug('setting body properties with y:', y, 'and x: ', x);
         this.body.style.setProperty('--mouse-tracker-top', (y - (this.tracker.clientHeight / 2)) + "px");
         this.body.style.setProperty('--mouse-tracker-left', (x - (this.tracker.clientWidth / 2)) + "px");
+
+        this.logDebug('setting position complete');
     }
 
     updateVisibility() {
@@ -75,10 +82,10 @@ class MouseTracker {
         let bodyRect = this.body.getBoundingClientRect();
         this.logDebug('body parameter:', bodyRect, 'mouse position:', this.getMousePosition(), 'tracker opacity:', this.tracker.style.opacity);
 
-        if (this.mousePosition.y >= bodyRect.top + this.boundTop + 20
-            && this.mousePosition.y <= bodyRect.bottom - this.boundBottom - 20
-            && this.mousePosition.x >= bodyRect.left + this.boundLeft + 20
-            && this.mousePosition.x <= bodyRect.right - this.boundRight - 20
+        if (this.mousePosition.y >= bodyRect.top + this.boundTop
+            && this.mousePosition.y <= bodyRect.bottom - this.boundBottom
+            && this.mousePosition.x >= bodyRect.left + this.boundLeft
+            && this.mousePosition.x <= bodyRect.right - this.boundRight
         ) {
             this.tracker.style.opacity = 1;
             this.logDebug('tracker visible');
@@ -121,7 +128,7 @@ class MouseTracker {
         addEventListener("DOMContentLoaded", () => {
 
             addEventListener("mousemove", (event) => {
-                this.setMousePosition({y: event.clientY, x: event.clientX})
+                this.setMousePosition({x: event.clientX, y: event.clientY});
                 this.setTrackerPosition(this.getMousePosition());
                 this.updateVisibility();
             });
@@ -129,8 +136,10 @@ class MouseTracker {
     }
 
     setTrackerPosition(object) {
+        this.logDebug('setting tracker position:', object);
         this.trackerPosition.x = this.checkHorizontalBounds(object.x);
         this.trackerPosition.y = this.checkVerticalBounds(object.y);
+        this.logDebug('setting setting tracker position complete');
 
         this.updatePosition();
     }
@@ -140,8 +149,10 @@ class MouseTracker {
     }
 
     setMousePosition(object) {
-        this.mousePosition.x = object.x;
-        this.mousePosition.y = object.y;
+        this.logDebug('setting mouse position:', object);
+        this.mousePosition.x = object.x + document.documentElement.scrollLeft;
+        this.mousePosition.y = object.y + document.documentElement.scrollTop;
+        this.logDebug('setting mouse position complete');
     }
 
     initTracker(trackerSelector) {
@@ -166,6 +177,10 @@ class MouseTracker {
         this.body.style.setProperty('--mouse-tracker-left', this.boundLeft + 'px');
 
         return this.body != null;
+    }
+
+    setLogActive(bool) {
+        this.logActive = bool;
     }
 
     logDebug(...args) {
