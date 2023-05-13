@@ -7,7 +7,11 @@ class MouseTracker {
     boundBottom = 100;
     boundRight = 100;
 
-    position = {
+    mousePosition = {
+        x: 0,
+        y: 0
+    }
+    trackerPosition = {
         x: 0,
         y: 0,
     }
@@ -51,18 +55,38 @@ class MouseTracker {
         this.boundRight = object.right;
 
         this.updatePosition();
+        this.updateVisibility();
     }
 
     getPosition() {
-        return this.position;
+        return this.trackerPosition;
     }
 
     updatePosition() {
-        let y = this.checkVerticalBounds(this.position.y);
-        let x = this.checkHorizontalBounds(this.position.x);
+        let y = this.checkVerticalBounds(this.trackerPosition.y);
+        let x = this.checkHorizontalBounds(this.trackerPosition.x);
 
         this.body.style.setProperty('--mouse-tracker-top', (y - (this.tracker.clientHeight / 2)) + "px");
         this.body.style.setProperty('--mouse-tracker-left', (x - (this.tracker.clientWidth / 2)) + "px");
+    }
+
+    updateVisibility() {
+        this.logDebug('updating visibility...');
+        let bodyRect = this.body.getBoundingClientRect();
+        this.logDebug('body parameter:', bodyRect, 'mouse position:', this.getMousePosition(), 'tracker opacity:', this.tracker.style.opacity);
+
+        if (this.mousePosition.y >= bodyRect.top + this.boundTop + 20
+            && this.mousePosition.y <= bodyRect.bottom - this.boundBottom - 20
+            && this.mousePosition.x >= bodyRect.left + this.boundLeft + 20
+            && this.mousePosition.x <= bodyRect.right - this.boundRight - 20
+        ) {
+            this.tracker.style.opacity = 1;
+            this.logDebug('tracker visible');
+        } else {
+            this.tracker.style.opacity = 0;
+            this.logDebug('tracker invisible');
+        }
+        this.logDebug('visibility updated');
     }
 
     checkVerticalBounds(number) {
@@ -97,16 +121,27 @@ class MouseTracker {
         addEventListener("DOMContentLoaded", () => {
 
             addEventListener("mousemove", (event) => {
-                this.setPosition({y: event.clientY, x: event.clientX});
+                this.setMousePosition({y: event.clientY, x: event.clientX})
+                this.setTrackerPosition(this.getMousePosition());
+                this.updateVisibility();
             });
         });
     }
 
-    setPosition(object) {
-        this.position.x = this.checkHorizontalBounds(object.x);
-        this.position.y = this.checkVerticalBounds(object.y);
+    setTrackerPosition(object) {
+        this.trackerPosition.x = this.checkHorizontalBounds(object.x);
+        this.trackerPosition.y = this.checkVerticalBounds(object.y);
 
         this.updatePosition();
+    }
+
+    getMousePosition() {
+        return this.mousePosition;
+    }
+
+    setMousePosition(object) {
+        this.mousePosition.x = object.x;
+        this.mousePosition.y = object.y;
     }
 
     initTracker(trackerSelector) {
