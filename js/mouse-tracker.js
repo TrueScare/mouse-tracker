@@ -3,31 +3,37 @@ class MouseTracker {
     /* region properties */
     logActive = false;
     useBounds = true;
-
+    /* stores the boundaries ob the body element */
     bounds = {
         top: 100,
         left: 100,
         bottom: 100,
         right: 100
     }
-
-
+    /* stores the coordinates of the mouse position */
     mousePosition = {
         x: 0,
         y: 0
     }
-
+    /* stores the coordinates of the tracker position */
     trackerPosition = {
         x: 0,
         y: 0,
     }
-
+    /* the "container" */
     body = null;
+    /* the actual tracker element */
     tracker = null;
+
     /* endregion properties */
 
     /* region constructors and initialization */
-    constructor(applicationSelector = '', trackerSelector = '', logActive = false) {
+    /**
+     * @param applicationSelector String
+     * @param trackerSelector String
+     * @param logActive boolean
+     */
+    constructor(applicationSelector, trackerSelector, logActive = false) {
         this.logActive = logActive;
         if (this.initBody(applicationSelector)) {
             this.initTracker(trackerSelector);

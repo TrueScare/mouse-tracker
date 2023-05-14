@@ -1,0 +1,5 @@
+.mouse-tracker {
+    position: absolute;
+    top: var(--mouse-tracker-top);
+    left: var(--mouse-tracker-left);
+}
