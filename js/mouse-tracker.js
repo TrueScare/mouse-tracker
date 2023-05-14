@@ -38,8 +38,7 @@ class MouseTracker {
         this.logDebug('trying to bind to ' + applicationSelector);
         this.body = document.querySelector(applicationSelector);
         if (this.body != null) {
-            this.logDebug('bound to:', this.body)
-            this.registerEvents();
+            this.logDebug('bound to:', this.body);
         } else {
             this.logDebug('bind unsuccessful');
         }
