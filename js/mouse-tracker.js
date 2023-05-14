@@ -1,25 +1,17 @@
+import {Position} from "./position.js";
+import {Bounds} from "./bounds.js";
+
 class MouseTracker {
 
     /* region properties */
     logActive = false;
     useBounds = true;
     /* stores the boundaries ob the body element */
-    bounds = {
-        top: 100,
-        left: 100,
-        bottom: 100,
-        right: 100
-    }
+    bounds = new Bounds(0, 0, 0, 0);
     /* stores the coordinates of the mouse position */
-    mousePosition = {
-        x: 0,
-        y: 0
-    }
+    mousePosition = new Position(0, 0);
     /* stores the coordinates of the tracker position */
-    trackerPosition = {
-        x: 0,
-        y: 0,
-    }
+    trackerPosition = new Position(0, 0);
     /* the "container" */
     body = null;
     /* the actual tracker element */
@@ -35,8 +27,7 @@ class MouseTracker {
      */
     constructor(applicationSelector, trackerSelector, logActive = false) {
         this.logActive = logActive;
-        if (this.initBody(applicationSelector)) {
-            this.initTracker(trackerSelector);
+        if (this.initBody(applicationSelector) && this.initTracker(trackerSelector)) {
             this.registerEvents();
         } else {
             this.logDebug('Something went wrong during initialization!');
@@ -65,13 +56,20 @@ class MouseTracker {
         if (this.tracker != null) {
             this.logDebug('bound tracker:', this.tracker);
         }
+
+        return this.body != null;
     }
 
     registerEvents() {
         addEventListener("DOMContentLoaded", () => {
 
             addEventListener("mousemove", (event) => {
-                this.setMousePosition({x: event.clientX, y: event.clientY});
+                this.setMousePosition(new Position(event.clientX, event.clientY));
+                this.setTrackerPosition(this.getMousePosition());
+                this.updateVisibility();
+            });
+
+            addEventListener("scroll", (event)=>{
                 this.setTrackerPosition(this.getMousePosition());
                 this.updateVisibility();
             });
@@ -136,13 +134,16 @@ class MouseTracker {
     }
 
     getMousePosition() {
-        return this.mousePosition;
+        return new Position(
+            this.mousePosition.x + document.documentElement.scrollLeft,
+            this.mousePosition.y + document.documentElement.scrollTop
+        );
     }
 
     setMousePosition(object) {
         this.logDebug('setting mouse position:', object);
-        this.mousePosition.x = object.x + document.documentElement.scrollLeft;
-        this.mousePosition.y = object.y + document.documentElement.scrollTop;
+        this.mousePosition.x = object.x;
+        this.mousePosition.y = object.y;
         this.logDebug('setting mouse position complete');
     }
 
@@ -179,10 +180,10 @@ class MouseTracker {
         let bodyRect = this.body.getBoundingClientRect();
         this.logDebug('body parameter:', bodyRect, 'mouse position:', this.getMousePosition(), 'tracker opacity:', this.tracker.style.opacity);
 
-        if (this.mousePosition.y >= bodyRect.top + document.documentElement.scrollTop + this.getBounds().top
-            && this.mousePosition.y <= bodyRect.bottom + document.documentElement.scrollTop - this.getBounds().bottom
-            && this.mousePosition.x >= bodyRect.left + document.documentElement.scrollLeft + this.getBounds().left
-            && this.mousePosition.x <= bodyRect.right + document.documentElement.scrollLeft - this.getBounds().right
+        if (this.getMousePosition().y >= bodyRect.top + document.documentElement.scrollTop + this.getBounds().top
+            && this.getMousePosition().y <= bodyRect.bottom + document.documentElement.scrollTop - this.getBounds().bottom
+            && this.getMousePosition().x >= bodyRect.left + document.documentElement.scrollLeft + this.getBounds().left
+            && this.getMousePosition().x <= bodyRect.right + document.documentElement.scrollLeft - this.getBounds().right
         ) {
             this.tracker.style.opacity = 1;
             this.logDebug('tracker visible');
