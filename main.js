@@ -6,6 +6,11 @@ let tracker3 = new MouseTracker('#tracker-body-3', '#mouse-tracker-3');
 
 let trackers = [tracker1, tracker2, tracker3];
 
+trackers.forEach((tracker) => {
+    tracker.setUseBounds(false);
+});
+
+
 let boundTop = document.getElementById('bound-top');
 let boundBottom = document.getElementById('bound-bottom');
 let boundLeft = document.getElementById('bound-left');
@@ -32,6 +37,7 @@ boundRight.onchange = (event) => {
     bounds.right = parseInt(boundRight.value);
     tracker1.setBounds(bounds);
 };
+
 logging.onchange = (event) => {
     trackers.forEach((tracker) => {
         tracker.setLogActive(logging.checked);

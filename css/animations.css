@@ -1,0 +1,5 @@
+@keyframes pulse-shadow {
+    100% {
+        filter: blur(100px);
+    }
+}

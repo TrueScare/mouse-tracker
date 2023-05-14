@@ -1,16 +1,22 @@
 class MouseTracker {
 
+    /* region properties */
     logActive = false;
+    useBounds = true;
 
-    boundTop = 100;
-    boundLeft = 100;
-    boundBottom = 100;
-    boundRight = 100;
+    bounds = {
+        top: 100,
+        left: 100,
+        bottom: 100,
+        right: 100
+    }
+
 
     mousePosition = {
         x: 0,
         y: 0
     }
+
     trackerPosition = {
         x: 0,
         y: 0,
@@ -18,110 +24,41 @@ class MouseTracker {
 
     body = null;
     tracker = null;
+    /* endregion properties */
 
+    /* region constructors and initialization */
     constructor(applicationSelector = '', trackerSelector = '', logActive = false) {
         this.logActive = logActive;
         if (this.initBody(applicationSelector)) {
             this.initTracker(trackerSelector);
             this.registerEvents();
-            /* expose to window */
-            window.mousetracker = this;
         } else {
             this.logDebug('Something went wrong during initialization!');
         }
     }
 
-    getBody() {
-        return this.body;
-    }
-
-    getTracker() {
-        return this.tracker;
-    }
-
-    getBounds() {
-        return {
-            top: this.boundTop,
-            bottom: this.boundBottom,
-            left: this.boundLeft,
-            right: this.boundRight
-        }
-    }
-
-    setBounds(object) {
-        this.logDebug('set bounds from:', object);
-        this.boundTop = object.top;
-        this.boundBottom = object.bottom;
-        this.boundLeft = object.left;
-        this.boundRight = object.right;
-        this.logDebug('setting boundaries complete');
-
-        this.logDebug('updating position and visibility');
-        this.updatePosition();
-        this.updateVisibility();
-    }
-
-    getPosition() {
-        return this.trackerPosition;
-    }
-
-    updatePosition() {
-        this.logDebug('updating visibility from tracker position:', this.trackerPosition);
-        let y = this.checkVerticalBounds(this.trackerPosition.y);
-        let x = this.checkHorizontalBounds(this.trackerPosition.x);
-
-        this.logDebug('setting body properties with y:', y, 'and x: ', x);
-        this.body.style.setProperty('--mouse-tracker-top', (y - (this.tracker.clientHeight / 2)) + "px");
-        this.body.style.setProperty('--mouse-tracker-left', (x - (this.tracker.clientWidth / 2)) + "px");
-
-        this.logDebug('setting position complete');
-    }
-
-    updateVisibility() {
-        this.logDebug('updating visibility...');
-        let bodyRect = this.body.getBoundingClientRect();
-        this.logDebug('body parameter:', bodyRect, 'mouse position:', this.getMousePosition(), 'tracker opacity:', this.tracker.style.opacity);
-
-        if (this.mousePosition.y >= bodyRect.top + this.boundTop
-            && this.mousePosition.y <= bodyRect.bottom - this.boundBottom
-            && this.mousePosition.x >= bodyRect.left + this.boundLeft
-            && this.mousePosition.x <= bodyRect.right - this.boundRight
-        ) {
-            this.tracker.style.opacity = 1;
-            this.logDebug('tracker visible');
+    initBody(applicationSelector) {
+        this.logDebug('trying to bind to ' + applicationSelector);
+        this.body = document.querySelector(applicationSelector);
+        if (this.body != null) {
+            this.logDebug('bound to:', this.body)
+            this.registerEvents();
         } else {
-            this.tracker.style.opacity = 0;
-            this.logDebug('tracker invisible');
+            this.logDebug('bind unsuccessful');
         }
-        this.logDebug('visibility updated');
+
+        this.body.style.setProperty('--mouse-tracker-top', this.getBounds().top + 'px');
+        this.body.style.setProperty('--mouse-tracker-left', this.getBounds().left + 'px');
+
+        return this.body != null;
     }
 
-    checkVerticalBounds(number) {
-        let bodyRect = this.body.getBoundingClientRect();
-        let y = number;
-
-        if (y < bodyRect.top + this.boundTop) {
-            y = bodyRect.top + this.boundTop;
+    initTracker(trackerSelector) {
+        this.logDebug('trying to bind tracker...');
+        this.tracker = this.body.querySelector(trackerSelector);
+        if (this.tracker != null) {
+            this.logDebug('bound tracker:', this.tracker);
         }
-        if (y > bodyRect.bottom - this.boundBottom) {
-            y = bodyRect.bottom - this.boundBottom;
-        }
-        return y
-    }
-
-    checkHorizontalBounds(number) {
-        let bodyRect = this.body.getBoundingClientRect();
-        let x = number;
-
-        if (x < bodyRect.left + this.boundLeft) {
-            x = bodyRect.left + this.boundLeft;
-        }
-
-        if (x > bodyRect.right - this.boundRight) {
-            x = bodyRect.right - this.boundRight;
-        }
-
-        return x;
     }
 
     registerEvents() {
@@ -133,6 +70,54 @@ class MouseTracker {
                 this.updateVisibility();
             });
         });
+    }
+
+    /* endregion constructors and initialization */
+
+    /* region getter/setter */
+    getBody() {
+        return this.body;
+    }
+
+    setBody(element) {
+        this.body = element;
+    }
+
+    getTracker() {
+        return this.tracker;
+    }
+
+    setTracker(element) {
+        this.tracker = element;
+    }
+
+    getBounds() {
+        this.logDebug('fetchings bounds');
+        if (!this.getUseBounds()) {
+            this.logDebug('bounds inactive');
+            return {
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0
+            }
+        }
+        this.logDebug('returning bounds:', this.bounds);
+        return this.bounds;
+    }
+
+    setBounds(object) {
+        this.logDebug('set bounds from:', object);
+        this.bounds = object;
+        this.logDebug('setting boundaries complete');
+
+        this.logDebug('updating position and visibility');
+        this.updatePosition();
+        this.updateVisibility();
+    }
+
+    getTrackerPosition() {
+        return this.trackerPosition;
     }
 
     setTrackerPosition(object) {
@@ -155,32 +140,81 @@ class MouseTracker {
         this.logDebug('setting mouse position complete');
     }
 
-    initTracker(trackerSelector) {
-        this.logDebug('trying to bind tracker...');
-        this.tracker = this.body.querySelector(trackerSelector);
-        if (this.tracker != null) {
-            this.logDebug('bound tracker:', this.tracker);
-        }
-    }
-
-    initBody(applicationSelector) {
-        this.logDebug('trying to bind to ' + applicationSelector);
-        this.body = document.querySelector(applicationSelector);
-        if (this.body != null) {
-            this.logDebug('bound to:', this.body)
-            this.registerEvents();
-        } else {
-            this.logDebug('bind unsuccessful');
-        }
-
-        this.body.style.setProperty('--mouse-tracker-top', this.boundTop + 'px');
-        this.body.style.setProperty('--mouse-tracker-left', this.boundLeft + 'px');
-
-        return this.body != null;
-    }
 
     setLogActive(bool) {
         this.logActive = bool;
+    }
+
+    getUseBounds() {
+        return this.useBounds;
+    }
+
+    setUseBounds(bool) {
+        this.useBounds = bool;
+    }
+
+    /* endregion getter/setter */
+
+    /* region methods*/
+    updatePosition() {
+        this.logDebug('updating visibility from tracker position:', this.trackerPosition);
+        let y = this.checkVerticalBounds(this.trackerPosition.y);
+        let x = this.checkHorizontalBounds(this.trackerPosition.x);
+
+        this.logDebug('setting body properties with y:', y, 'and x: ', x);
+        this.body.style.setProperty('--mouse-tracker-top', (y - (this.tracker.clientHeight / 2)) + "px");
+        this.body.style.setProperty('--mouse-tracker-left', (x - (this.tracker.clientWidth / 2)) + "px");
+
+        this.logDebug('setting position complete');
+    }
+
+    updateVisibility() {
+        this.logDebug('updating visibility...');
+        let bodyRect = this.body.getBoundingClientRect();
+        this.logDebug('body parameter:', bodyRect, 'mouse position:', this.getMousePosition(), 'tracker opacity:', this.tracker.style.opacity);
+
+        if (this.mousePosition.y >= bodyRect.top + document.documentElement.scrollTop + this.getBounds().top
+            && this.mousePosition.y <= bodyRect.bottom + document.documentElement.scrollTop - this.getBounds().bottom
+            && this.mousePosition.x >= bodyRect.left + document.documentElement.scrollLeft + this.getBounds().left
+            && this.mousePosition.x <= bodyRect.right + document.documentElement.scrollLeft - this.getBounds().right
+        ) {
+            this.tracker.style.opacity = 1;
+            this.logDebug('tracker visible');
+        } else {
+            this.tracker.style.opacity = 0;
+            this.logDebug('tracker invisible');
+        }
+        this.logDebug('visibility updated');
+    }
+
+    checkVerticalBounds(number) {
+        let bodyRect = this.body.getBoundingClientRect();
+        let y = number;
+        let bounds = this.getBounds();
+
+
+        if (y < bodyRect.top + document.documentElement.scrollTop + this.getBounds().top) {
+            y = bodyRect.top + document.documentElement.scrollTop + this.getBounds().top;
+        }
+        if (y > bodyRect.bottom + document.documentElement.scrollTop - this.getBounds().bottom) {
+            y = bodyRect.bottom + document.documentElement.scrollTop - this.getBounds().bottom;
+        }
+        return y
+    }
+
+    checkHorizontalBounds(number) {
+        let bodyRect = this.body.getBoundingClientRect();
+        let x = number;
+
+        if (x < bodyRect.left + document.documentElement.scrollLeft + this.getBounds().left) {
+            x = bodyRect.left + document.documentElement.scrollLeft + this.getBounds().left;
+        }
+
+        if (x > bodyRect.right + document.documentElement.scrollLeft - this.getBounds().right) {
+            x = bodyRect.right + document.documentElement.scrollLeft - this.getBounds().right;
+        }
+
+        return x;
     }
 
     logDebug(...args) {
@@ -188,6 +222,8 @@ class MouseTracker {
             console.log(...args);
         }
     }
+
+    /* endregion methods */
 }
 
 export {MouseTracker}
