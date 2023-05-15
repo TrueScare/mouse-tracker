@@ -34,6 +34,10 @@ class MouseTracker {
         }
     }
 
+    /**
+     * @param applicationSelector
+     * @returns {boolean}
+     */
     initBody(applicationSelector) {
         this.logDebug('trying to bind to ' + applicationSelector);
         this.body = document.querySelector(applicationSelector);
@@ -43,12 +47,13 @@ class MouseTracker {
             this.logDebug('bind unsuccessful');
         }
 
-        this.body.style.setProperty('--mouse-tracker-top', this.getBounds().top + 'px');
-        this.body.style.setProperty('--mouse-tracker-left', this.getBounds().left + 'px');
-
         return this.body != null;
     }
 
+    /**
+     * @param trackerSelector
+     * @returns {boolean}
+     */
     initTracker(trackerSelector) {
         this.logDebug('trying to bind tracker...');
         this.tracker = this.body.querySelector(trackerSelector);
@@ -59,16 +64,19 @@ class MouseTracker {
         return this.body != null;
     }
 
+    /**
+     * make sure that all important events are set in one place
+     */
     registerEvents() {
         addEventListener("DOMContentLoaded", () => {
-
+            /* a mouse tracker should listen on a mouse move event in order to be usefull, right? */
             addEventListener("mousemove", (event) => {
                 this.setMousePosition(new Position(event.clientX, event.clientY));
                 this.setTrackerPosition(this.getMousePosition());
                 this.updateVisibility();
             });
-
-            addEventListener("scroll", (event)=>{
+            /* it's not necessary to listen to the scroll event, but it makes the whole functionality way smoother */
+            addEventListener("scroll", (event) => {
                 this.setTrackerPosition(this.getMousePosition());
                 this.updateVisibility();
             });
@@ -94,6 +102,10 @@ class MouseTracker {
         this.tracker = element;
     }
 
+    /**
+     * Returns a 0 Bounds object if bounds are disabled
+     * @returns {{top: number, left: number, bottom: number, right: number}|Bounds}
+     */
     getBounds() {
         this.logDebug('fetchings bounds');
         if (!this.getUseBounds()) {
@@ -115,7 +127,9 @@ class MouseTracker {
         this.logDebug('setting boundaries complete');
 
         this.logDebug('updating position and visibility');
-        this.updatePosition();
+
+        /* make sure that the tracker stays inside the borders */
+        this.updateTrackerPosition();
         this.updateVisibility();
     }
 
@@ -129,7 +143,7 @@ class MouseTracker {
         this.trackerPosition.y = this.checkVerticalBounds(object.y);
         this.logDebug('setting setting tracker position complete');
 
-        this.updatePosition();
+        this.updateTrackerPosition();
     }
 
     getMousePosition() {
@@ -146,7 +160,6 @@ class MouseTracker {
         this.logDebug('setting mouse position complete');
     }
 
-
     setLogActive(bool) {
         this.logActive = bool;
     }
@@ -162,7 +175,10 @@ class MouseTracker {
     /* endregion getter/setter */
 
     /* region methods*/
-    updatePosition() {
+    /**
+     * actual movement of the tracker
+     */
+    updateTrackerPosition() {
         this.logDebug('updating visibility from tracker position:', this.trackerPosition);
         let y = this.checkVerticalBounds(this.trackerPosition.y);
         let x = this.checkHorizontalBounds(this.trackerPosition.x);
@@ -174,6 +190,9 @@ class MouseTracker {
         this.logDebug('setting position complete');
     }
 
+    /**
+     * disable the tracker when not over its body
+     */
     updateVisibility() {
         this.logDebug('updating visibility...');
         let bodyRect = this.body.getBoundingClientRect();
@@ -193,6 +212,11 @@ class MouseTracker {
         this.logDebug('visibility updated');
     }
 
+    /**
+     * make sure that the provided X coordinate is inside the current border limits
+     * @param number
+     * @returns {number}
+     */
     checkVerticalBounds(number) {
         let bodyRect = this.body.getBoundingClientRect();
         let y = number;
@@ -208,6 +232,11 @@ class MouseTracker {
         return y
     }
 
+    /**
+     * make sure that the provided Y coordinate is inside the current border limits
+     * @param number
+     * @returns {number}
+     */
     checkHorizontalBounds(number) {
         let bodyRect = this.body.getBoundingClientRect();
         let x = number;
