@@ -76,7 +76,7 @@ class MouseTracker {
                 this.updateVisibility();
             });
             /* it's not necessary to listen to the scroll event, but it makes the whole functionality way smoother */
-            addEventListener("scroll", (event) => {
+            addEventListener("scroll", () => {
                 this.setTrackerPosition(this.getMousePosition());
                 this.updateVisibility();
             });
@@ -220,8 +220,6 @@ class MouseTracker {
     checkVerticalBounds(number) {
         let bodyRect = this.body.getBoundingClientRect();
         let y = number;
-        let bounds = this.getBounds();
-
 
         if (y < bodyRect.top + document.documentElement.scrollTop + this.getBounds().top) {
             y = bodyRect.top + document.documentElement.scrollTop + this.getBounds().top;
