@@ -18,7 +18,7 @@ Simple HTML Page with the tracker.
 <head>
     <base href=".">
     <link type="text/css" rel="stylesheet" href="base.css">
-    <script type="module" src="main.js"></script>
+    <script type="module" src="../mousetracker_composer_test/main.js"></script>
     <title>Mouse Tracker</title>
 </head>
 <body>
