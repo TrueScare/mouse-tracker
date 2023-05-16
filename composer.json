@@ -1,0 +1,15 @@
+{
+  "name": "liamh/mouse-tracker",
+  "description": "A small JS app that gives the Opportunity to style a mouse tracker in a given container.",
+  "version": "0.1",
+  "keywords": ["javasscript", "mouse-tracker"],
+  "readme": "./README.md",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Liam Heuwagen",
+      "email": "liam.heuwagen@outlook.de",
+      "role": "Developer"
+    }
+  ]
+}
